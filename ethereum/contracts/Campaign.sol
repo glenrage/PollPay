@@ -20,7 +20,7 @@ contract Campaign {
         address recipient;
         bool complete;
         uint approvalCount;
-        mapping (address => bool) approvals;
+        mapping(address => bool) approvals;
     }
 
     Request[] public requests;
@@ -47,13 +47,12 @@ contract Campaign {
     }
 
     function createRequest(string description, uint value, address recipient) public restricted {
-        require(approvers[msg.sender]);
         Request memory newRequest = Request({
-            description: description,
-            value: value,
-            recipient: recipient,
-            complete: false,
-            approvalCount: 0
+           description: description,
+           value: value,
+           recipient: recipient,
+           complete: false,
+           approvalCount: 0
         });
 
         requests.push(newRequest);
@@ -63,7 +62,7 @@ contract Campaign {
         Request storage request = requests[index];
 
         require(approvers[msg.sender]);
-        require(!requests[index].approvals[msg.sender]);
+        require(!request.approvals[msg.sender]);
 
         request.approvals[msg.sender] = true;
         request.approvalCount++;
@@ -77,5 +76,21 @@ contract Campaign {
 
         request.recipient.transfer(request.value);
         request.complete = true;
+    }
+
+    function getSummary() public view returns (
+      uint, uint, uint, uint, address
+      ) {
+        return (
+          minimumContribution,
+          this.balance,
+          requests.length,
+          approversCount,
+          manager
+        );
+    }
+
+    function getRequestsCount() public view returns (uint) {
+        return requests.length;
     }
 }
